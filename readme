@@ -1,0 +1,14 @@
+React and electron biolerplate
+
+Dependencies
+
+Babel to convert JSX to js
+
+
+Directory structure
+
+app directory
+-> contains react source code
+
+dist
+-> contains javascript compiled babel from the app directory
