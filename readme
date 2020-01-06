@@ -12,3 +12,8 @@ app directory
 
 dist
 -> contains javascript compiled babel from the app directory
+
+
+CSS
+styled components
+1 rem = 20 px
