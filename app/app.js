@@ -12,7 +12,7 @@ class App extends React.Component {
     this.handleLoadedVideo = this.handleLoadedVideo.bind(this);
     this.state = {
       videoFile: false,
-      activePage: "SelectVideoPage"
+      activePage: "ControlsPage"
     };
   }
 
