@@ -1,8 +1,7 @@
-
 const React = require("react");
-// Import the useDropzone hooks from react-dropzone
-const useDropzone = require("react-dropzone").useDropzone
-const styled = require('styled-components').default
+
+const useDropzone = require("react-dropzone").useDropzone;
+const styled = require("styled-components").default;
 
 const Container = styled.div`
   display: flex;
@@ -22,6 +21,11 @@ const Container = styled.div`
 
   &:hover {
     background: white;
+  }
+
+  article {
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 `;
 
@@ -45,31 +49,29 @@ const DropBox = styled.div`
   font-weight: bold;
 `;
 
-const Dropzone = ({ onDrop, accept }) => {
-  // Initializing useDropzone hooks with options
+function SelectVideoPage(props) {
+  const onDrop = React.useCallback(acceptedFiles => {
+    props.onSelectVideo(acceptedFiles[0]);
+  }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept,
+    accept: "video/*",
     multiple: false
   });
 
   return (
     <Container {...getRootProps()}>
       <input {...getInputProps()} />
-      {isDragActive && (
-        <DropBox>Release to drop the files here.</DropBox>
-      )}
+      {isDragActive && <DropBox>Release to drop the files here.</DropBox>}
       <article>
-        <h1>
-          Choose a video to start
-        </h1>
+        <h1>Drag and drop video here, or click to select file</h1>
         <p>
           Supported file types: mp4, m4v, avi, wmv, mov, flv, mpg, mpeg, gif
         </p>
       </article>
     </Container>
   );
-};
+}
 
-
-module.exports = Dropzone;
+module.exports = SelectVideoPage;

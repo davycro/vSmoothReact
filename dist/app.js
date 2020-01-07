@@ -2,22 +2,42 @@ const React = require("react");
 
 const ReactDOM = require("react-dom");
 
-const Dropzone = require("./Dropzone");
+const SelectVideoPage = require("./SelectVideoPage");
+
+const ControlsPage = require("./ControlsPage");
 
 const e = React.createElement;
 
-function App() {
-  // onDrop function
-  const onDrop = React.useCallback(acceptedFiles => {
-    // this callback will be called after files get dropped, we will get the acceptedFiles. If you want, you can even access the rejected files too
-    console.log(acceptedFiles);
-  }, []); // We pass onDrop function and accept prop to the component. It will be used as initial params for useDropzone hook
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleLoadedVideo = this.handleLoadedVideo.bind(this);
+    this.state = {
+      videoFile: false,
+      activePage: "SelectVideoPage"
+    };
+  }
 
-  return React.createElement(Dropzone, {
-    onDrop: onDrop,
-    accept: "image/*"
-  });
+  handleLoadedVideo(videoFile) {
+    this.setState({
+      videoFile: videoFile,
+      activePage: "ControlsPage"
+    });
+  }
+
+  render() {
+    switch (this.state.activePage) {
+      case "SelectVideoPage":
+        return React.createElement(SelectVideoPage, {
+          onSelectVideo: this.handleLoadedVideo
+        });
+
+      case "ControlsPage":
+        return React.createElement(ControlsPage, null);
+    }
+  }
+
 }
 
-const domContainer = document.querySelector('#App');
+const domContainer = document.querySelector("#App");
 ReactDOM.render(e(App), domContainer);
