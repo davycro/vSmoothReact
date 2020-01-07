@@ -43,14 +43,14 @@ const Button = styled.button`
 `;
 
 
-function ControlsPage() {
-
+function ControlsPage(props) {
+  console.log(props)
   return (
     <LayoutContainer>
       <aside>
         <Button>Start Over</Button>
         <Button>Sample</Button>
-        <Button>Full Video</Button>
+        <Button onClick={props.onClickRenderVideo}>Full Video</Button>
       </aside>
       <article>
         <h3>Accuracy</h3>

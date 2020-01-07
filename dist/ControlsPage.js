@@ -41,8 +41,11 @@ const Button = styled.button`
   }
 `;
 
-function ControlsPage() {
-  return React.createElement(LayoutContainer, null, React.createElement("aside", null, React.createElement(Button, null, "Start Over"), React.createElement(Button, null, "Sample"), React.createElement(Button, null, "Full Video")), React.createElement("article", null, React.createElement("h3", null, "Accuracy"), React.createElement(Slider, {
+function ControlsPage(props) {
+  console.log(props);
+  return React.createElement(LayoutContainer, null, React.createElement("aside", null, React.createElement(Button, null, "Start Over"), React.createElement(Button, null, "Sample"), React.createElement(Button, {
+    onClick: props.onClickRenderVideo
+  }, "Full Video")), React.createElement("article", null, React.createElement("h3", null, "Accuracy"), React.createElement(Slider, {
     min: 1,
     max: 15,
     defaultValue: 5,
