@@ -3,44 +3,43 @@ const os = require("os");
 const path = require("path");
 const { spawn } = require('child_process');
 
+
 class VideoProcessor {
 
   constructor(sourceFile) {
-    this.binFile = './bin/ffmpeg';
     this.sourceFile = sourceFile.path;
-
+    this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vsmooth-'));
     this.videoDuration = null;
-
-    this.workDir = null;
-    this.transformFile = null;
-    this.vidstabdetectFile = null;
-    this.finalFile = null;
   }
 
   async build(options) {
-    await this._makeWorkDir();
-    await this._vidstabdetect(options);
-    await this._vidstabtransform(options);
 
-    options.onComplete({finalFile: this.finalFile});
-  }
+    const inFile = this.sourceFile;
+    const transformFile = path.join(this.workDir, 'transform.trf');
+    const vidstabdetectFile = path.join(this.workDir, 'transform.mp4');
+    const outFile = path.join(this.workDir, 'stable.mp4');
 
-  _makeWorkDir() {
-    return new Promise(
-      (resolve, reject) => {
-        if (this.workDir) resolve();
-        fs.mkdtemp(path.join(os.tmpdir(), 'vsmooth-'), (err, folder) => {
-          if (err) throw err;
+    const {onProgress} = options;
 
-          this.workDir = folder;
-          this.transformFile = path.join(this.workDir, 'transform.trf');
-          this.vidstabdetectFile = path.join(this.workDir, 'out.mp4');
-          this.finalFile = path.join(this.workDir, 'stable.mp4');
+    const vidstabdetectArgs = [
+      '-i', inFile,
+      '-vf', `vidstabdetect=shakiness=10:accuracy=15:result=${transformFile}`,
+      vidstabdetectFile
+    ]
 
-          resolve();
-        });
-      }
-    )
+    const vidstabtransformArgs = [
+      '-i', vidstabdetectFile,
+      '-vf', `vidstabtransform=input=${transformFile}:optalgo=gauss:smoothing=10:crop=keep`,
+      outFile
+    ]
+
+    options.onProgressLabel = 'Stabilizing video (step 1 of 2)';
+    await this._run(vidstabdetectArgs, options);
+
+    options.onProgressLabel = 'Transform video (step 2 of 2)';
+    await this._run(vidstabtransformArgs, options);
+
+    options.onComplete({finalFile: outFile});
   }
 
   _run(args, options) {
@@ -65,9 +64,10 @@ class VideoProcessor {
         // logging parameters
         let vidDuration = null;
         let currentTime = 0;
-
+        let logData = [];
         ffmpeg.stderr.on('data', (data) => {
           const dataStr = Buffer.from(data).toString('utf8');
+          logData.push(dataStr);
 
           if (!vidDuration) {
             const matches = dataStr.match(/Duration:(.*), start:/);
@@ -89,39 +89,13 @@ class VideoProcessor {
         });
 
         ffmpeg.on('close', (code) => {
-          console.log(`child process exited with code ${code}`);
+          if (code==1) {
+            console.log(`Error! ${logData.join(' ')}`);
+          }
           resolve();
         });
       }
     )
-  }
-
-  _vidstabdetect(options) {
-    const {onProgress} = options
-    const args = [
-      '-i', this.sourceFile,
-      '-vf', `vidstabdetect=shakiness=10:accuracy=15:result=${this.transformFile}`,
-      this.vidstabdetectFile
-    ]
-    options.onProgressLabel = 'Stabilizing video (step 1 of 2)';
-
-    return this._run(args, options);
-  }
-
-  _vidstabtransform(options) {
-    const inFile = this.vidstabdetectFile;
-    const transformFile = this.transformFile;
-    const outFile = this.finalFile;
-
-    const binFile = this.binFile;
-    const args = [
-      '-i', inFile,
-      '-vf', `vidstabtransform=input=${transformFile}:optalgo=gauss:smoothing=10:crop=keep`,
-      outFile
-    ]
-    options.onProgressLabel = 'Transform video (step 2 of 2)';
-
-    return this._run(args, options);
   }
 
 }
