@@ -8,12 +8,12 @@ function RenderPage(props) {
   }
 
   const {
-    step,
+    label,
     currentTime,
     totalTime
   } = props.progress;
   const percentDone = currentTime / totalTime * 100.0;
-  return React.createElement("div", null, React.createElement("h1", null, step), React.createElement("p", null, `${percentDone.toFixed(2)} percent done`));
+  return React.createElement("div", null, React.createElement("h1", null, label), React.createElement("p", null, `${percentDone.toFixed(2)} percent done`));
 }
 
 module.exports = RenderPage;

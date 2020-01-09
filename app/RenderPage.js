@@ -9,13 +9,13 @@ function RenderPage(props) {
     )
   }
 
-  const {step, currentTime, totalTime} = props.progress;
+  const {label, currentTime, totalTime} = props.progress;
   const percentDone = (currentTime / totalTime) * 100.0;
 
   return (
 
     <div>
-      <h1>{step}</h1>
+      <h1>{label}</h1>
       <p>
         {`${percentDone.toFixed(2)} percent done`}
       </p>
