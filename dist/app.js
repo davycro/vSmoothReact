@@ -10,7 +10,7 @@ const RenderPage = require("./RenderPage");
 
 const DownloadPage = require("./DownloadPage");
 
-const VideoProcessor = require('./VideoProcessor');
+const VideoProcessor = require("./VideoProcessor");
 
 const e = React.createElement;
 
@@ -18,12 +18,27 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.handleLoadedVideo = this.handleLoadedVideo.bind(this);
+    this.handleReselectVideo = this.handleReselectVideo.bind(this);
     this.handleStartRender = this.handleStartRender.bind(this);
     this.handleRenderProgress = this.handleRenderProgress.bind(this);
     this.handleRenderCompleted = this.handleRenderCompleted.bind(this);
+    this.handleChangeControl = this.handleChangeControl.bind(this);
     this.state = {
       activePage: "SelectVideoPage"
     };
+    this.processorOptions = {};
+    this.state = {
+      activePage: "ControlsPage"
+    };
+  }
+
+  handleReselectVideo() {
+    this.videoProcessor = null;
+    this.processorOptions = {};
+    this.setState({
+      videoFile: null,
+      activePage: "SelectVideoPage"
+    });
   }
 
   handleLoadedVideo(videoFile) {
@@ -34,13 +49,19 @@ class App extends React.Component {
     });
   }
 
+  handleChangeControl(key, value) {
+    this.processorOptions[key] = value;
+    console.log(this.processorOptions);
+  }
+
   handleStartRender() {
     this.setState({
       activePage: "RenderPage"
     });
     this.videoProcessor.build({
       onProgress: this.handleRenderProgress,
-      onComplete: this.handleRenderCompleted
+      onComplete: this.handleRenderCompleted,
+      ...this.processorOptions
     });
   }
 
@@ -67,7 +88,9 @@ class App extends React.Component {
 
       case "ControlsPage":
         return React.createElement(ControlsPage, {
-          onClickRenderVideo: this.handleStartRender
+          onClickRenderVideo: this.handleStartRender,
+          onChangeControl: this.handleChangeControl,
+          onClickReselectVideo: this.handleReselectVideo
         });
 
       case "RenderPage":
@@ -77,7 +100,8 @@ class App extends React.Component {
 
       case "DownloadPage":
         return React.createElement(DownloadPage, {
-          videoFile: this.state.finalFile
+          videoFile: this.state.finalFile,
+          onClickStartOver: this.handleReselectVideo
         });
     }
   }

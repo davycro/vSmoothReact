@@ -6,21 +6,29 @@ const ControlsPage = require("./ControlsPage");
 const RenderPage = require("./RenderPage");
 const DownloadPage = require("./DownloadPage");
 
-const VideoProcessor = require('./VideoProcessor');
+const VideoProcessor = require("./VideoProcessor");
 
 const e = React.createElement;
-
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.handleLoadedVideo = this.handleLoadedVideo.bind(this);
+    this.handleReselectVideo = this.handleReselectVideo.bind(this);
     this.handleStartRender = this.handleStartRender.bind(this);
     this.handleRenderProgress = this.handleRenderProgress.bind(this);
     this.handleRenderCompleted = this.handleRenderCompleted.bind(this);
+    this.handleChangeControl = this.handleChangeControl.bind(this);
     this.state = {
-      activePage: "SelectVideoPage",
+      activePage: "SelectVideoPage"
     };
+    this.processorOptions = {};
+  }
+
+  handleReselectVideo() {
+    this.videoProcessor = null;
+    this.processorOptions = {};
+    this.setState({ videoFile: null, activePage: "SelectVideoPage" });
   }
 
   handleLoadedVideo(videoFile) {
@@ -28,17 +36,23 @@ class App extends React.Component {
     this.setState({ videoFile: videoFile, activePage: "ControlsPage" });
   }
 
+  handleChangeControl(key, value) {
+    this.processorOptions[key] = value;
+    console.log(this.processorOptions)
+  }
+
   handleStartRender() {
-    this.setState({activePage: "RenderPage"})
+    this.setState({ activePage: "RenderPage" });
     this.videoProcessor.build({
       onProgress: this.handleRenderProgress,
-      onComplete: this.handleRenderCompleted
+      onComplete: this.handleRenderCompleted,
+      ...this.processorOptions
     });
   }
 
   handleRenderProgress(options) {
     if (!options) return null;
-    this.setState({renderProgress: options});
+    this.setState({ renderProgress: options });
   }
 
   handleRenderCompleted(options) {
@@ -53,11 +67,22 @@ class App extends React.Component {
       case "SelectVideoPage":
         return <SelectVideoPage onSelectVideo={this.handleLoadedVideo} />;
       case "ControlsPage":
-        return <ControlsPage onClickRenderVideo={this.handleStartRender} />;
+        return (
+          <ControlsPage
+            onClickRenderVideo={this.handleStartRender}
+            onChangeControl={this.handleChangeControl}
+            onClickReselectVideo={this.handleReselectVideo}
+          />
+        );
       case "RenderPage":
         return <RenderPage progress={this.state.renderProgress} />;
       case "DownloadPage":
-        return <DownloadPage videoFile={this.state.finalFile} />;
+        return (
+          <DownloadPage
+            videoFile={this.state.finalFile}
+            onClickStartOver={this.handleReselectVideo}
+          />
+        );
     }
   }
 }

@@ -21,10 +21,17 @@ class VideoProcessor {
     const vidstabdetectFile = path.join(this.workDir, 'transform.mp4');
     const outFile = path.join(this.workDir, 'stable.mp4');
     const {
-      onProgress
+      shakiness = 5,
+      accuracy = 15,
+      smoothing = 10,
+      maxshift = -1,
+      maxangle = -1,
+      crop = "keep",
+      optalgo = "gauss",
+      tripod = 0
     } = options;
-    const vidstabdetectArgs = ['-i', inFile, '-vf', `vidstabdetect=shakiness=10:accuracy=15:result=${transformFile}`, vidstabdetectFile];
-    const vidstabtransformArgs = ['-i', vidstabdetectFile, '-vf', `vidstabtransform=input=${transformFile}:optalgo=gauss:smoothing=10:crop=keep`, outFile];
+    const vidstabdetectArgs = ['-i', inFile, '-vf', `vidstabdetect=shakiness=${shakiness}:accuracy=${accuracy}:tripod=${tripod}:result=${transformFile}`, vidstabdetectFile];
+    const vidstabtransformArgs = ['-i', vidstabdetectFile, '-vf', `vidstabtransform=input=${transformFile}:optalgo=${optalgo}:smoothing=${smoothing}:crop=${crop}:maxangle=${maxangle}:maxshift=${maxshift}:tripod=${tripod}`, outFile];
     options.onProgressLabel = 'Stabilizing video (step 1 of 2)';
     await this._run(vidstabdetectArgs, options);
     options.onProgressLabel = 'Transform video (step 2 of 2)';
@@ -43,7 +50,7 @@ class VideoProcessor {
 
     const convertTimeStringToMilliSeconds = (a, b, c) => {
       // time(HH:MM:SS.mss)
-      return c = 0, a = a.split('.'), !a[1] || (c += a[1] * 1), a = a[0].split(':'), b = a.length, c += (b == 3 ? a[0] * 3600 + a[1] * 60 + a[2] * 1 : b == 2 ? a[0] * 60 + a[1] * 1 : s = a[0] * 1) * 1e3, c;
+      return c = 0, a = a.split("."), !a[1] || (c += a[1] * 1), a = a[0].split(":"), b = a.length, c += (b == 3 ? a[0] * 3600 + a[1] * 60 + a[2] * 1 : b == 2 ? a[0] * 60 + a[1] * 1 : s = a[0] * 1) * 1e3, c;
     };
 
     console.log(`Running: ${binFile} ${args.join(' ')}`);
